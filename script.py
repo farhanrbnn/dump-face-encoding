@@ -1,5 +1,4 @@
 import face_recognition as fr 
-import numpy as np
 import cv2
 import os
 import glob
@@ -13,23 +12,26 @@ known_encoding = []
 known_name = []
 
 def get_encoding():
+	print('[INFO] Processing in images')
+	
 	for f in folders:
 		names = f.split('/')[2]
 
 		for images in glob.glob(f + '**/*.jpg'):
 
-			image_file = fr.load_image_file(images)
-			location = fr.face_locations(image_file)
-			face_encoding = fr.face_encodings(image_file, known_face_locations = location)[0]
+			images_file = cv2.imread(images)
+			rgb = cv2.cvtColor(images_file, cv2.COLOR_BGR2RGB)
 
-			print('[INFO] Processing in images')
+			location = fr.face_locations(rgb)
+			face_encoding = fr.face_encodings(rgb, known_face_locations = location)
 
-			known_encoding.append(face_encoding)
-			known_name.append(names)
+			for encoding in face_encoding:
+				known_encoding.append(encoding)
+				known_name.append(names)
 
 def dump_pickle():
 	try: 
-		data = {'nama' : known_name, 'encoding' : known_encoding }
+		data = {'encoding':known_encoding, 'nama':known_name}
 		file = open('encoding.pickle', 'wb')
 		file.write(pickle.dumps(data))
 		file.close()
